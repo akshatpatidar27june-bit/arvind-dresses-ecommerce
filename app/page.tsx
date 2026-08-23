@@ -1,87 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "../lib/supabase";
 
-const categories = [
-  { name: "Sarees", note: "Elegant & festive" },
-  { name: "Suits & Sets", note: "Ready-to-wear" },
-  { name: "Kurtis", note: "Everyday style" },
-  { name: "Dresses", note: "Modern looks" },
-];
-
-const products = [
-  { name: "Elegant Festive Saree", price: "₹2,499", old: "₹3,199", tag: "BESTSELLER" },
-  { name: "Printed Anarkali Suit", price: "₹1,899", old: "₹2,399", tag: "NEW" },
-  { name: "Premium Cotton Kurti", price: "₹899", old: "₹1,199", tag: "POPULAR" },
-  { name: "Designer Party Dress", price: "₹1,699", old: "₹2,199", tag: "TRENDING" },
-];
+type Product = { id: string; name: string; price: number; compare_at_price: number | null; images: string[] | null; stock: number; sku: string | null; is_active: boolean };
+const categories = ["Sarees", "Suits & Sets", "Kurtis", "Dresses"];
 
 export default function Home() {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <main>
-      <div className="topbar"><span>✨ Festive collection is coming soon</span><span className="topbar-sep">•</span><span>Free delivery on selected orders</span><span className="topbar-location">Mandsaur, Madhya Pradesh</span></div>
-
-      <header className="nav">
-        <div className="container nav-inner">
-          <button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-          <a className="logo" href="#"><span>ARVIND</span><small>DRESSES</small></a>
-          <nav className={menuOpen ? "nav-links mobile-open" : "nav-links"}>
-            <a href="#shop" onClick={() => setMenuOpen(false)}>Shop</a>
-            <a href="#categories" onClick={() => setMenuOpen(false)}>Categories</a>
-            <a href="#offers" onClick={() => setMenuOpen(false)}>Offers</a>
-            <a href="#about" onClick={() => setMenuOpen(false)}>Our Story</a>
-            <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-          </nav>
-          <div className="nav-actions">
-            <button className="icon-btn" aria-label="Search" onClick={() => setSearchOpen(!searchOpen)}>⌕ <span>Search</span></button>
-            <button className="icon-btn bag-btn" aria-label="Shopping bag">♧ <span>Bag</span><b>0</b></button>
-          </div>
-        </div>
-        {searchOpen && <div className="search-panel"><div className="container"><input autoFocus placeholder="Search sarees, kurtis, suits..." /></div></div>}
-      </header>
-
-      <section className="hero">
-        <div className="container hero-grid">
-          <div className="hero-copy">
-            <div className="eyebrow">ARVIND DRESSES • MANDSAUR</div>
-            <h1>Every outfit.<br /><em>A little more you.</em></h1>
-            <p>Discover thoughtfully selected ethnic and contemporary fashion for celebrations, everyday moments and everything in between.</p>
-            <div className="hero-actions"><a className="cta" href="#shop">Shop new arrivals <span>→</span></a><a className="text-link" href="#categories">Explore collections</a></div>
-            <div className="trust-row"><span>✓ Curated styles</span><span>✓ Easy ordering</span><span>✓ Blue Dart delivery</span></div>
-          </div>
-          <div className="hero-visual">
-            <div className="hero-art"><div className="art-label"><small>THE NEW EDIT</small><strong>Festive<br />2026</strong><span>Coming soon</span></div><div className="art-shape one"/><div className="art-shape two"/><div className="art-shape three"/></div>
-            <div className="floating-note"><span>01</span><div><b>Made for moments</b><small>From Mandsaur, with style.</small></div></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="benefits"><div className="container benefits-grid"><div><span>01</span><b>Fresh collections</b><small>New styles added regularly</small></div><div><span>02</span><b>Easy ordering</b><small>Simple, secure checkout</small></div><div><span>03</span><b>Reliable delivery</b><small>Shipped through Blue Dart</small></div><div><span>04</span><b>Local support</b><small>We&apos;re here when you need us</small></div></div></section>
-
-      <section className="section" id="categories">
-        <div className="container">
-          <div className="section-head"><div><div className="eyebrow">01 / Collections</div><h2>Find your next favourite.</h2></div><a className="text-link" href="#shop">View all →</a></div>
-          <div className="categories">{categories.map((category, i) => <a className={`category category-${i + 1}`} href="#shop" key={category.name}><div className="category-art"><span>0{i + 1}</span></div><div className="category-copy"><small>{category.note}</small><strong>{category.name}</strong><span>Shop collection →</span></div></a>)}</div>
-        </div>
-      </section>
-
-      <section className="section products-section" id="shop">
-        <div className="container">
-          <div className="section-head"><div><div className="eyebrow">02 / The edit</div><h2>What&apos;s catching eyes.</h2></div><span className="muted">Preview collection • More coming soon</span></div>
-          <div className="products">{products.map((product, i) => <article className="product" key={product.name}><div className={`product-image product-image-${i + 1}`}><span className="product-tag">{product.tag}</span><button aria-label={`Add ${product.name} to wishlist`}>♡</button><div className="product-placeholder"><span>ARVIND</span><small>PRODUCT IMAGE</small></div></div><div className="product-body"><h3>{product.name}</h3><div><span className="price">{product.price}</span><span className="old">{product.old}</span></div><small>Inclusive of applicable taxes</small></div></article>)}</div>
-        </div>
-      </section>
-
-      <section className="offer-banner" id="offers"><div className="container offer-inner"><div><div className="eyebrow">03 / Just in</div><h2>Dress for the<br /><em>good days.</em></h2><p>Our festive edit is on its way. Beautiful silhouettes, rich details and styles made for celebrations.</p><a className="cta light" href="#shop">Explore the edit →</a></div><div className="offer-orbit"><span>FESTIVE<br />2026</span></div></div></section>
-
-      <section className="section story" id="about"><div className="container story-grid"><div className="story-art"><span>ARVIND<br />DRESSES</span></div><div><div className="eyebrow">04 / Our story</div><h2>From a trusted Mandsaur store to your screen.</h2><p>Arvind Dresses brings together styles chosen with a simple idea: shopping for clothes should feel personal, easy and exciting.</p><p>We&apos;re taking the same local care online — with new collections, helpful support and dependable delivery.</p><a className="text-link" href="#contact">Get in touch →</a></div></div></section>
-
-      <section className="newsletter"><div className="container newsletter-inner"><div><div className="eyebrow">Stay in the loop</div><h2>First look. New drops. Good things.</h2></div><div className="newsletter-form"><input placeholder="Your email address" type="email" /><button>Join us →</button></div></div></section>
-
-      <footer className="footer" id="contact"><div className="container"><div className="footer-top"><div><a className="logo footer-logo" href="#"><span>ARVIND</span><small>DRESSES</small></a><p className="muted">Your fashion destination in Mandsaur, now online.</p></div><div><strong>Shop</strong><a href="#categories">Sarees</a><a href="#categories">Suits &amp; Sets</a><a href="#categories">Kurtis</a><a href="#categories">Dresses</a></div><div><strong>Help</strong><a href="#">Shipping &amp; delivery</a><a href="#">Returns policy</a><a href="#">Order support</a><a href="#">Contact us</a></div><div><strong>Visit us</strong><p className="muted">Mandsaur, Madhya Pradesh<br />India</p><p className="muted">Mon–Sun • Store hours</p></div></div><div className="footer-bottom"><span>© 2026 Arvind Dresses. All rights reserved.</span><span>Made with care in Mandsaur.</span></div></div></footer>
-    </main>
-  );
+  const [searchOpen, setSearchOpen] = useState(false), [menuOpen, setMenuOpen] = useState(false), [query, setQuery] = useState(""), [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true);
+  useEffect(() => { (async () => { const { data } = await supabase.from("products").select("id,name,price,compare_at_price,images,stock,sku,is_active").eq("is_active", true).order("created_at", { ascending: false }).limit(12); setProducts((data as Product[]) ?? []); setLoading(false); })(); }, []);
+  const filtered = useMemo(() => { const q = query.trim().toLowerCase(); return q ? products.filter(p => p.name.toLowerCase().includes(q) || (p.sku ?? "").toLowerCase().includes(q)) : products; }, [products, query]);
+  return <main>
+    <div className="topbar"><span>✨ Festive collection is coming soon</span><span className="topbar-sep">•</span><span>Free delivery on selected orders</span><span className="topbar-location">Mandsaur, Madhya Pradesh</span></div>
+    <header className="nav"><div className="container nav-inner"><button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen(!menuOpen)}>☰</button><a className="logo" href="#"><span>ARVIND</span><small>DRESSES</small></a><nav className={menuOpen ? "nav-links mobile-open" : "nav-links"}><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#offers">Offers</a><a href="#about">Our Story</a><a href="#contact">Contact</a></nav><div className="nav-actions"><button className="icon-btn" aria-label="Search" onClick={() => setSearchOpen(!searchOpen)}>⌕ <span>Search</span></button><button className="icon-btn bag-btn" aria-label="Shopping bag">♧ <span>Bag</span><b>0</b></button></div></div>{searchOpen && <div className="search-panel"><div className="container"><input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search sarees, kurtis, suits..." /></div></div>}</header>
+    <section className="hero"><div className="container hero-grid"><div className="hero-copy"><div className="eyebrow">ARVIND DRESSES • MANDSAUR</div><h1>Every outfit.<br/><em>A little more you.</em></h1><p>Discover thoughtfully selected ethnic and contemporary fashion for celebrations, everyday moments and everything in between.</p><div className="hero-actions"><a className="cta" href="#shop">Shop new arrivals <span>→</span></a><a className="text-link" href="#categories">Explore collections</a></div><div className="trust-row"><span>✓ Curated styles</span><span>✓ Easy ordering</span><span>✓ Blue Dart delivery</span></div></div><div className="hero-visual"><div className="hero-art"><div className="art-label"><small>THE NEW EDIT</small><strong>Festive<br/>2026</strong><span>Coming soon</span></div><div className="art-shape one"/><div className="art-shape two"/><div className="art-shape three"/></div><div className="floating-note"><span>01</span><div><b>Made for moments</b><small>From Mandsaur, with style.</small></div></div></div></div></section>
+    <section className="benefits"><div className="container benefits-grid"><div><span>01</span><b>Fresh collections</b><small>New styles added regularly</small></div><div><span>02</span><b>Easy ordering</b><small>Simple, secure checkout</small></div><div><span>03</span><b>Reliable delivery</b><small>Shipped through Blue Dart</small></div><div><span>04</span><b>Local support</b><small>We&apos;re here when you need us</small></div></div></section>
+    <section className="section" id="categories"><div className="container"><div className="section-head"><div><div className="eyebrow">01 / Collections</div><h2>Find your next favourite.</h2></div><a className="text-link" href="#shop">View all →</a></div><div className="categories">{categories.map((c,i)=><a className={`category category-${i+1}`} href="#shop" key={c}><div className="category-art"><span>0{i+1}</span></div><div className="category-copy"><small>{["Elegant & festive","Ready-to-wear","Everyday style","Modern looks"][i]}</small><strong>{c}</strong><span>Shop collection →</span></div></a>)}</div></div></section>
+    <section className="section products-section" id="shop"><div className="container"><div className="section-head"><div><div className="eyebrow">02 / The edit</div><h2>What&apos;s catching eyes.</h2></div><span className="muted">Live collection • Updated from our store</span></div>{loading?<p className="muted">Loading the latest collection…</p>:filtered.length===0?<div className="panel empty-panel"><div className="empty-icon">✦</div><h2>{query?"No products found":"New collection coming soon"}</h2><p>{query?"Try another search.":"Add products from the Admin panel and they will appear here automatically."}</p></div>:<div className="products">{filtered.map((p,i)=><article className="product" key={p.id}><div className={`product-image product-image-${i%4+1}`}>{p.images?.[0]?<img src={p.images[0]} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div className="product-placeholder"><span>ARVIND</span><small>PRODUCT IMAGE</small></div>}<span className="product-tag">{p.stock>0?"AVAILABLE":"SOLD OUT"}</span><button aria-label="Wishlist">♡</button></div><div className="product-body"><h3>{p.name}</h3><div><span className="price">₹{Number(p.price).toLocaleString("en-IN")}</span>{p.compare_at_price?<span className="old">₹{Number(p.compare_at_price).toLocaleString("en-IN")}</span>:null}</div><small>{p.stock>0?`${p.stock} in stock`:"Currently unavailable"}</small></div></article>)}</div>}</div></section>
+    <section className="offer-banner" id="offers"><div className="container offer-inner"><div><div className="eyebrow">03 / Just in</div><h2>Dress for the<br/><em>good days.</em></h2><p>Our festive edit is on its way. Beautiful silhouettes, rich details and styles made for celebrations.</p><a className="cta light" href="#shop">Explore the edit →</a></div><div className="offer-orbit"><span>FESTIVE<br/>2026</span></div></div></section>
+    <section className="section story" id="about"><div className="container story-grid"><div className="story-art"><span>ARVIND<br/>DRESSES</span></div><div><div className="eyebrow">04 / Our story</div><h2>From a trusted Mandsaur store to your screen.</h2><p>Arvind Dresses brings together styles chosen with a simple idea: shopping for clothes should feel personal, easy and exciting.</p><p>We&apos;re taking the same local care online — with new collections, helpful support and dependable delivery.</p><a className="text-link" href="#contact">Get in touch →</a></div></div></section>
+    <section className="newsletter"><div className="container newsletter-inner"><div><div className="eyebrow">Stay in the loop</div><h2>First look. New drops. Good things.</h2></div><div className="newsletter-form"><input placeholder="Your email address" type="email"/><button>Join us →</button></div></div></section>
+    <footer className="footer" id="contact"><div className="container"><div className="footer-top"><div><a className="logo footer-logo" href="#"><span>ARVIND</span><small>DRESSES</small></a><p className="muted">Your fashion destination in Mandsaur, now online.</p></div><div><strong>Shop</strong><a href="#categories">Sarees</a><a href="#categories">Suits &amp; Sets</a><a href="#categories">Kurtis</a><a href="#categories">Dresses</a></div><div><strong>Help</strong><a href="#">Shipping &amp; delivery</a><a href="#">Returns policy</a><a href="#">Order support</a><a href="#">Contact us</a></div><div><strong>Visit us</strong><p className="muted">Mandsaur, Madhya Pradesh<br/>India</p><p className="muted">Mon–Sun • Store hours</p></div></div><div className="footer-bottom"><span>© 2026 Arvind Dresses. All rights reserved.</span><span>Made with care in Mandsaur.</span></div></div></footer>
+  </main>;
 }
