@@ -1,12 +1,10 @@
-import './image-upload.css';
-
 'use client';
 
+import './image-upload.css';
 import { FormEvent, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 type Product = { id:string; name:string; category_id:string|null; price:number; stock:number; sku:string|null; is_active:boolean; description:string|null; images:string[]|null };
-
 type FormState = {name:string;price:string;stock:string;sku:string;description:string;images:string[]};
 
 export default function AdminPage(){
@@ -19,10 +17,7 @@ export default function AdminPage(){
  function openEdit(p:Product){setEditing(p);setForm({name:p.name,price:String(p.price),stock:String(p.stock),sku:p.sku??'',description:p.description??'',images:p.images??[]});setMessage('');setShowForm(true)}
  async function uploadImages(files:FileList|null){if(!files?.length)return;setUploading(true);setMessage('');const urls=[...form.images];for(const file of Array.from(files)){if(!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)){setMessage('Only JPG, PNG, WEBP or AVIF images are allowed.');continue}if(file.size>5*1024*1024){setMessage(`${file.name} is larger than 5 MB.`);continue}const safe=file.name.toLowerCase().replace(/[^a-z0-9.-]+/g,'-');const path=`${crypto.randomUUID()}-${safe}`;const {error}=await supabase.storage.from('product-images').upload(path,file,{contentType:file.type,upsert:false});if(error){setMessage(`Image upload failed: ${error.message}`);continue}const {data}=supabase.storage.from('product-images').getPublicUrl(path);urls.push(data.publicUrl)}setForm(f=>({...f,images:urls}));setUploading(false)}
  function removeImage(index:number){setForm(f=>({...f,images:f.images.filter((_,i)=>i!==index)}))}
- async function saveProduct(e:FormEvent){e.preventDefault();setSaving(true);setMessage('');const name=form.name.trim();if(!name){setMessage('Product name is required.');setSaving(false);return}let error;
-  const payload={name,price:Number(form.price||0),stock:Number(form.stock||0),sku:form.sku.trim()||null,description:form.description.trim()||null,images:form.images};
-  if(editing){({error}=await supabase.from('products').update(payload).eq('id',editing.id))}else{const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'-'+Date.now();({error}=await supabase.from('products').insert({...payload,slug,is_active:true}))}
-  if(error)setMessage(error.message);else{setMessage(editing?'Product updated successfully.':'Product added successfully.');setShowForm(false);setEditing(null);await loadProducts()}setSaving(false)}
+ async function saveProduct(e:FormEvent){e.preventDefault();setSaving(true);setMessage('');const name=form.name.trim();if(!name){setMessage('Product name is required.');setSaving(false);return}const payload={name,price:Number(form.price||0),stock:Number(form.stock||0),sku:form.sku.trim()||null,description:form.description.trim()||null,images:form.images};let error;if(editing){({error}=await supabase.from('products').update(payload).eq('id',editing.id))}else{const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'-'+Date.now();({error}=await supabase.from('products').insert({...payload,slug,is_active:true}))}if(error)setMessage(error.message);else{setMessage(editing?'Product updated successfully.':'Product added successfully.');setShowForm(false);setEditing(null);await loadProducts()}setSaving(false)}
  async function toggleProduct(p:Product){const {error}=await supabase.from('products').update({is_active:!p.is_active}).eq('id',p.id);if(error)setMessage(error.message);else loadProducts()}
  async function deleteProduct(id:string){if(!window.confirm('Delete this product?'))return;const {error}=await supabase.from('products').delete().eq('id',id);if(error)setMessage(error.message);else loadProducts()}
  if(checking)return <main className="admin-login"><div className="login-card"><p>Loading admin…</p></div></main>;
