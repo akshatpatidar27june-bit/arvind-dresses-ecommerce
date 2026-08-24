@@ -30,6 +30,16 @@ create table if not exists products (
   updated_at timestamptz default now()
 );
 
+create table if not exists product_size_variants (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references products(id) on delete cascade,
+  size text not null,
+  stock integer not null default 0 check (stock >= 0),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(product_id, size)
+);
+
 create table if not exists customers (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -87,11 +97,11 @@ create table if not exists coupons (
 
 create index if not exists products_category_idx on products(category_id);
 create index if not exists products_active_idx on products(is_active);
+create index if not exists product_size_variants_product_idx on product_size_variants(product_id);
 create index if not exists orders_status_idx on orders(order_status);
 create index if not exists orders_created_idx on orders(created_at desc);
 create index if not exists order_items_order_idx on order_items(order_id);
 
--- Starter categories
 insert into categories (name, slug) values
   ('Sarees', 'sarees'),
   ('Suits', 'suits'),
