@@ -28,7 +28,7 @@ export default function CheckoutPage() {
   async function placeOrder(e:FormEvent){
     e.preventDefault(); if(!items.length)return; setBusy(true); setMessage('');
     const orderNumber=`ARD-${Date.now().toString().slice(-8)}`;
-    const {data,error}=await supabase.rpc('place_test_order',{p_order:{order_number:orderNumber,customer_name:name.trim(),phone:phone.trim(),email:email.trim(),address:address.trim(),city:city.trim(),state:state.trim(),pincode:pincode.trim(),total},p_items:items.map(i=>({product_id:i.id,quantity:i.quantity,size:i.size||null,color:i.color||null}))});
+    const {data,error}=await supabase.rpc('place_test_order',{p_order:{order_number:orderNumber,customer_name:name.trim(),phone:phone.trim(),email:email.trim(),address:address.trim(),city:city.trim(),state:state.trim(),pincode:pincode.trim(),total},p_items:items.map(i=>({product_id:i.id,quantity:i.quantity}))});
     const order=Array.isArray(data)?data[0]:data;
     if(error||!order){setMessage(error?.message||'Unable to create the order. Please try again.');setBusy(false);return;}
     saveCart([]); router.push(`/order-success?order=${encodeURIComponent(order.order_number)}`);
