@@ -1,13 +1,14 @@
 'use client';
-import {useEffect} from 'react';
 
-export default function AdminGeneralImagePreview(){
- useEffect(()=>{
-  const cleanups=new Map<HTMLInputElement,()=>void>();
-  const attach=()=>{const input=document.getElementById('product-images') as HTMLInputElement|null;if(!input||cleanups.has(input))return;const host=input.closest('.upload-box');if(!host)return;let preview=host.querySelector('.general-image-preview') as HTMLDivElement|null;if(!preview){preview=document.createElement('div');preview.className='general-image-preview';host.appendChild(preview)};
-   const render=()=>{preview!.innerHTML='';Array.from(input.files??[]).forEach((file,index)=>{if(!file.type.startsWith('image/'))return;const wrap=document.createElement('div');wrap.className='general-image-item';const img=document.createElement('img');const objectUrl=URL.createObjectURL(file);img.src=objectUrl;img.alt=file.name;img.onload=()=>URL.revokeObjectURL(objectUrl);const remove=document.createElement('button');remove.type='button';remove.className='general-image-remove';remove.textContent='×';remove.title='Remove image';remove.setAttribute('aria-label',`Remove ${file.name}`);remove.addEventListener('click',()=>{const dt=new DataTransfer();Array.from(input.files??[]).forEach((f,i)=>{if(i!==index)dt.items.add(f)});input.files=dt.files;render();input.dispatchEvent(new Event('change',{bubbles:true}))});const name=document.createElement('small');name.textContent=file.name;wrap.append(img,remove,name);preview!.appendChild(wrap)})};
-   input.addEventListener('change',render);render();cleanups.set(input,()=>input.removeEventListener('change',render))};
-  attach();const observer=new MutationObserver(attach);observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();cleanups.forEach(fn=>fn());cleanups.clear()};
- },[]);
- return <style jsx global>{`.general-image-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.general-image-preview>div{position:relative;width:78px;display:grid;gap:4px}.general-image-preview img{width:78px;height:88px;object-fit:cover;border-radius:8px;border:1px solid #e4ddd6;background:#f6f1ec}.general-image-preview small{font-size:8px;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.general-image-remove{position:absolute;right:4px;top:4px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:16px;line-height:20px;cursor:pointer;z-index:2}.general-image-remove:hover{background:#7b3f98}`}</style>;
+type Props={images:string[];onRemove:(index:number)=>void};
+
+export default function AdminGeneralImagePreview({images,onRemove}:Props){
+ if(!images.length)return null;
+ return <div className="general-image-preview" aria-label="General product photos">
+  {images.map((url,index)=><div className="general-image-item" key={`${url}-${index}`}>
+   <img src={url} alt={`Product photo ${index+1}`} />
+   <button type="button" className="general-image-remove" onClick={()=>onRemove(index)} title="Remove image" aria-label={`Remove product photo ${index+1}`}>×</button>
+  </div>)}
+  <style jsx>{`.general-image-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.general-image-item{position:relative;width:86px;height:98px}.general-image-item img{width:86px;height:98px;display:block;object-fit:cover;border-radius:8px;border:1px solid #e4ddd6;background:#f6f1ec}.general-image-remove{position:absolute;right:4px;top:4px;width:23px;height:23px;border:0;border-radius:50%;background:rgba(0,0,0,.78);color:#fff;font-size:17px;line-height:21px;cursor:pointer;z-index:2}.general-image-remove:hover{background:#7b3f98}`}</style>
+ </div>;
 }
