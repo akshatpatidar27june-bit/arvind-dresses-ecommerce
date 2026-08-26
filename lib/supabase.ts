@@ -11,6 +11,9 @@ if (!supabaseUrl || !supabasePublishableKey) {
 const client = createClient(supabaseUrl, supabasePublishableKey)
 const originalFrom = client.storage.from.bind(client.storage)
 
+// Keep the caller's storage path unchanged. The previous implementation uploaded
+// the optimized WebP under a different `.webp` path while callers saved the
+// original path in the database, producing URLs that pointed at missing files.
 client.storage.from = ((bucket: string) => {
   const bucketApi = originalFrom(bucket)
   if (bucket !== 'product-images') return bucketApi
@@ -19,12 +22,13 @@ client.storage.from = ((bucket: string) => {
     if (typeof File !== 'undefined' && fileBody instanceof File && fileBody.type.startsWith('image/')) {
       try {
         const optimized = await compressProductImage(fileBody)
-        return originalUpload(path.replace(/\.[^.]+$/, '') + '.webp', optimized.file, {
+        return originalUpload(path, optimized.file, {
           ...(options ?? {}),
           contentType: 'image/webp',
+          upsert: options?.upsert ?? false,
         })
       } catch {
-        // Preserve the existing upload behavior if optimization is unavailable.
+        // If browser-side optimization is unavailable, still upload the original.
       }
     }
     return originalUpload(path, fileBody, options)
